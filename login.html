@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MW GAME - 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-mid: #151b2e;
+            --bg-light: #1e2842;
+            --m-color: #ff3366;
+            --w-color: #00d9ff;
+            --accent: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #8899bb;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 51, 102, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 217, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .logo .m-letter {
+            color: var(--m-color);
+            text-shadow: 0 0 20px var(--m-glow);
+        }
+
+        .logo .w-letter {
+            color: var(--w-color);
+            text-shadow: 0 0 20px var(--w-glow);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            letter-spacing: 0.2em;
+        }
+
+        .form-panel {
+            background: var(--bg-mid);
+            border: 2px solid var(--bg-light);
+            border-radius: 16px;
+            padding: 40px;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-dark);
+            border: 2px solid var(--text-secondary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--w-color);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--m-color) 0%, var(--w-color) 100%);
+            color: white;
+            box-shadow: 
+                0 4px 20px rgba(255, 51, 102, 0.3),
+                0 4px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 30px rgba(255, 51, 102, 0.4),
+                0 6px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--w-color);
+            color: var(--w-color);
+        }
+
+        .error-message {
+            background: rgba(255, 51, 102, 0.2);
+            border: 1px solid var(--m-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: var(--m-color);
+            text-align: center;
+            display: none;
+        }
+
+        .link-text {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+
+        .link-text a {
+            color: var(--w-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link-text a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+            
+            .form-panel {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <span class="m-letter">M</span><span class="w-letter">W</span>
+        </div>
+        <div class="subtitle">로그인</div>
+
+        <div class="form-panel">
+            <div class="form-title" id="loginTitle">로그인</div>
+            
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" id="email" placeholder="example@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">비밀번호</label>
+                    <input type="password" class="form-input" id="password" placeholder="비밀번호" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">로그인</button>
+                <button type="button" class="btn btn-secondary" onclick="location.href='index.html'">취소</button>
+            </form>
+
+            <div class="link-text">
+                계정이 없으신가요? <a href="signup.html">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCC0wATHn9czB7bwCn5RijT5zHpRF9_xS8",
+            authDomain: "mw-game-954a8.firebaseapp.com",
+            databaseURL: "https://mw-game-954a8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mw-game-954a8",
+            storageBucket: "mw-game-954a8.firebasestorage.app",
+            messagingSenderId: "768733083712",
+            appId: "1:768733083712:web:7f194e8a59514eb74447a5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        
+        window.auth = auth;
+        window.database = database;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+        window.dbRef = ref;
+        window.dbGet = get;
+        
+        console.log("Firebase initialized!");
+    </script>
+
+    <script>
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Firebase Authentication 로그인
+                const userCredential = await window.signInWithEmailAndPassword(
+                    window.auth, 
+                    email, 
+                    password
+                );
+                
+                const user = userCredential.user;
+
+                // 사용자 정보 가져오기
+                const userSnapshot = await window.dbGet(
+                    window.dbRef(window.database, 'users/' + user.uid)
+                );
+
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.val();
+                    
+                    // 승인 상태 체크
+                    if (userData.status === 'pending') {
+                        showError('관리자의 승인을 기다리고 있습니다');
+                        return;
+                    }
+                    
+                    if (userData.status === 'rejected') {
+                        showError('승인이 거부되었습니다. 관리자에게 문의하세요');
+                        return;
+                    }
+                    
+                    // 로컬 스토리지에 사용자 정보 저장
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: userData.displayName,
+                        role: userData.role,
+                        status: userData.status
+                    }));
+
+                    // 관리자면 관리자 페이지로, 아니면 진행자 페이지로
+                    if (userData.role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'host.html';
+                    }
+                } else {
+                    showError('사용자 정보를 찾을 수 없습니다');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                let errorMessage = '로그인 중 오류가 발생했습니다';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = '존재하지 않는 계정입니다';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = '비밀번호가 일치하지 않습니다';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = '유효하지 않은 이메일 형식입니다';
+                } else if (error.code === 'auth/invalid-credential') {
+                    errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다';
+                }
+                
+                showError(errorMessage);
+            }
+        }
+
+        window.handleLogin = handleLogin;
+
+        // URL 파라미터에서 mode 확인
+        const urlParams = new URLSearchParams(window.location.search);
+        const loginMode = urlParams.get('mode');
+
+        // 제목 설정
+        if (loginMode === 'admin') {
+            document.getElementById('loginTitle').textContent = '👑 관리자 로그인';
+        } else if (loginMode === 'host') {
+            document.getElementById('loginTitle').textContent = '🎮 진행자 로그인';
+        } else {
+            document.getElementById('loginTitle').textContent = '로그인';
+        }
+
+        // 로그인 성공 시 리디렉션 로직 수정
+        const originalHandleLogin = handleLogin;
+        handleLogin = async function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const userCredential = await window.signInWithEmailAndPassword(
+                    window.auth, 
+                    email, 
+                    password
+                );
+                
+                const user = userCredential.user;
+                const userSnapshot = await window.dbGet(
+                    window.dbRef(window.database, 'users/' + user.uid)
+                );
+
+                if (userSnapshot.exists()) {
+                    const userData = userSnapshot.val();
+                    
+                    // 승인 상태 체크
+                    if (userData.status === 'pending') {
+                        showError('관리자의 승인을 기다리고 있습니다');
+                        return;
+                    }
+                    
+                    if (userData.status === 'rejected') {
+                        showError('승인이 거부되었습니다. 관리자에게 문의하세요');
+                        return;
+                    }
+                    
+                    // 로컬 스토리지에 사용자 정보 저장
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: userData.displayName,
+                        role: userData.role,
+                        status: userData.status
+                    }));
+
+                    // mode에 따른 리디렉션
+                    if (loginMode === 'admin') {
+                        // 관리자 로그인 요청
+                        if (userData.role === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else {
+                            showError('관리자 권한이 없습니다');
+                        }
+                    } else if (loginMode === 'host') {
+                        // 진행자 로그인 요청
+                        if (userData.role === 'admin') {
+                            // 관리자도 진행자 모드 가능
+                            window.location.href = 'host.html';
+                        } else if (userData.status === 'approved') {
+                            window.location.href = 'host.html';
+                        } else {
+                            showError('진행자 권한이 없습니다');
+                        }
+                    } else {
+                        // 기본: 역할에 따라 자동 분기
+                        if (userData.role === 'admin') {
+                            window.location.href = 'admin.html';
+                        } else {
+                            window.location.href = 'host.html';
+                        }
+                    }
+                } else {
+                    showError('사용자 정보를 찾을 수 없습니다');
+                }
+
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                let errorMessage = '로그인 중 오류가 발생했습니다';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = '존재하지 않는 계정입니다';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = '비밀번호가 일치하지 않습니다';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = '유효하지 않은 이메일 형식입니다';
+                } else if (error.code === 'auth/invalid-credential') {
+                    errorMessage = '이메일 또는 비밀번호가 올바르지 않습니다';
+                }
+                
+                showError(errorMessage);
+            }
+        };
+
+        window.handleLogin = handleLogin;
+    </script>
+</body>
+</html>

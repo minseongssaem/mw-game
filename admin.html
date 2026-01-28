@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MW GAME - 관리자</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-mid: #151b2e;
+            --bg-light: #1e2842;
+            --m-color: #ff3366;
+            --w-color: #00d9ff;
+            --accent: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #8899bb;
+            --success: #00ff88;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 51, 102, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 217, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            margin-bottom: 10px;
+        }
+
+        .logo .m-letter {
+            color: var(--m-color);
+            text-shadow: 0 0 20px var(--m-color);
+        }
+
+        .logo .w-letter {
+            color: var(--w-color);
+            text-shadow: 0 0 20px var(--w-color);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .admin-panel {
+            background: var(--bg-mid);
+            border: 2px solid var(--bg-light);
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .panel-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid var(--m-color);
+            color: var(--m-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--m-color);
+            color: white;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .filter-tab {
+            padding: 12px 25px;
+            background: var(--bg-dark);
+            border: 2px solid var(--bg-light);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tab.active {
+            border-color: var(--w-color);
+            color: var(--w-color);
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .user-card {
+            background: var(--bg-dark);
+            border: 2px solid var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .user-email {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .user-meta {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        .meta-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .meta-tag.pending {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .meta-tag.approved {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .meta-tag.rejected {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--m-color);
+            border: 1px solid var(--m-color);
+        }
+
+        .meta-tag.admin {
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--w-color);
+            border: 1px solid var(--w-color);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-approve {
+            background: var(--success);
+            color: var(--bg-dark);
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+        }
+
+        .btn-reject {
+            background: var(--m-color);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 51, 102, 0.4);
+        }
+
+        .btn-admin {
+            background: var(--w-color);
+            color: var(--bg-dark);
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-revoke {
+            background: transparent;
+            border: 2px solid var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .btn-revoke:hover {
+            border-color: var(--m-color);
+            color: var(--m-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-dark);
+            border: 2px solid var(--bg-light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'Orbitron', monospace;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .user-card {
+                grid-template-columns: 1fr;
+            }
+
+            .user-actions {
+                justify-content: stretch;
+            }
+
+            .action-btn {
+                flex: 1;
+            }
+
+            .filter-tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="m-letter">M</span><span class="w-letter">W</span>
+            </div>
+            <div class="subtitle">관리자 대시보드</div>
+        </div>
+
+        <div class="admin-panel">
+            <div class="panel-header">
+                <div class="panel-title">사용자 관리</div>
+                <button class="logout-btn" onclick="logout()">로그아웃</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers" style="color: var(--w-color);">0</div>
+                    <div class="stat-label">전체 사용자</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pendingUsers" style="color: var(--accent);">0</div>
+                    <div class="stat-label">승인 대기</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="approvedUsers" style="color: var(--success);">0</div>
+                    <div class="stat-label">승인됨</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="adminUsers" style="color: var(--w-color);">0</div>
+                    <div class="stat-label">관리자</div>
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterUsers('all')">전체</button>
+                <button class="filter-tab" onclick="filterUsers('pending')">승인 대기</button>
+                <button class="filter-tab" onclick="filterUsers('approved')">승인됨</button>
+                <button class="filter-tab" onclick="filterUsers('rejected')">거부됨</button>
+                <button class="filter-tab" onclick="filterUsers('admin')">관리자</button>
+            </div>
+
+            <div class="user-list" id="userList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">⏳</div>
+                    <div>사용자 목록을 불러오는 중...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCC0wATHn9czB7bwCn5RijT5zHpRF9_xS8",
+            authDomain: "mw-game-954a8.firebaseapp.com",
+            databaseURL: "https://mw-game-954a8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mw-game-954a8",
+            storageBucket: "mw-game-954a8.firebasestorage.app",
+            messagingSenderId: "768733083712",
+            appId: "1:768733083712:web:7f194e8a59514eb74447a5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+        
+        window.auth = auth;
+        window.database = database;
+        window.dbRef = ref;
+        window.dbOnValue = onValue;
+        window.dbUpdate = update;
+        window.signOut = signOut;
+        
+        window.firebaseReady = true;
+        window.dispatchEvent(new Event('firebaseReady'));
+    </script>
+
+    <script>
+        let allUsers = {};
+        let currentFilter = 'all';
+
+        function init() {
+            // Check if user is admin
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            
+            if (!currentUser.uid || currentUser.role !== 'admin') {
+                alert('관리자 권한이 필요합니다');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadUsers();
+        }
+
+        function loadUsers() {
+            const usersRef = window.dbRef(window.database, 'users');
+            
+            window.dbOnValue(usersRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    allUsers = snapshot.val();
+                    updateStats();
+                    displayUsers();
+                } else {
+                    document.getElementById('userList').innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <div>등록된 사용자가 없습니다</div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function updateStats() {
+            const users = Object.values(allUsers);
+            
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('pendingUsers').textContent = users.filter(u => u.status === 'pending').length;
+            document.getElementById('approvedUsers').textContent = users.filter(u => u.status === 'approved').length;
+            document.getElementById('adminUsers').textContent = users.filter(u => u.role === 'admin').length;
+        }
+
+        function displayUsers() {
+            const userList = document.getElementById('userList');
+            const users = Object.entries(allUsers).filter(([uid, user]) => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'admin') return user.role === 'admin';
+                return user.status === currentFilter;
+            });
+
+            if (users.length === 0) {
+                userList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div>필터에 해당하는 사용자가 없습니다</div>
+                    </div>
+                `;
+                return;
+            }
+
+            userList.innerHTML = users.map(([uid, user]) => {
+                const status = user.status || 'pending';
+                const role = user.role || 'host';
+                const createdDate = new Date(user.createdAt).toLocaleDateString('ko-KR');
+
+                let statusTag = '';
+                if (role === 'admin') {
+                    statusTag = '<span class="meta-tag admin">관리자</span>';
+                } else if (status === 'approved') {
+                    statusTag = '<span class="meta-tag approved">승인됨</span>';
+                } else if (status === 'rejected') {
+                    statusTag = '<span class="meta-tag rejected">거부됨</span>';
+                } else {
+                    statusTag = '<span class="meta-tag pending">승인 대기</span>';
+                }
+
+                let actions = '';
+                if (role !== 'admin') {
+                    if (status === 'pending') {
+                        actions = `
+                            <button class="action-btn btn-approve" onclick="approveUser('${uid}')">승인</button>
+                            <button class="action-btn btn-reject" onclick="rejectUser('${uid}')">거부</button>
+                        `;
+                    } else if (status === 'approved') {
+                        actions = `
+                            <button class="action-btn btn-admin" onclick="makeAdmin('${uid}')">관리자 지정</button>
+                            <button class="action-btn btn-revoke" onclick="revokeUser('${uid}')">권한 취소</button>
+                        `;
+                    } else if (status === 'rejected') {
+                        actions = `
+                            <button class="action-btn btn-approve" onclick="approveUser('${uid}')">승인</button>
+                        `;
+                    }
+                }
+
+                return `
+                    <div class="user-card">
+                        <div class="user-info">
+                            <div class="user-name">${user.displayName || '이름 없음'}</div>
+                            <div class="user-email">${user.email}</div>
+                            <div class="user-meta">
+                                ${statusTag}
+                                <span class="meta-tag" style="background: rgba(136, 153, 187, 0.2); color: var(--text-secondary); border: 1px solid var(--text-secondary);">
+                                    ${createdDate} 가입
+                                </span>
+                            </div>
+                        </div>
+                        <div class="user-actions">
+                            ${actions}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterUsers(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            displayUsers();
+        }
+
+        async function approveUser(uid) {
+            if (confirm('이 사용자를 승인하시겠습니까?')) {
+                try {
+                    await window.dbUpdate(window.dbRef(window.database, 'users/' + uid), {
+                        status: 'approved'
+                    });
+                    console.log('User approved:', uid);
+                } catch (error) {
+                    console.error('Error approving user:', error);
+                    alert('승인 중 오류가 발생했습니다');
+                }
+            }
+        }
+
+        async function rejectUser(uid) {
+            if (confirm('이 사용자를 거부하시겠습니까?')) {
+                try {
+                    await window.dbUpdate(window.dbRef(window.database, 'users/' + uid), {
+                        status: 'rejected'
+                    });
+                    console.log('User rejected:', uid);
+                } catch (error) {
+                    console.error('Error rejecting user:', error);
+                    alert('거부 중 오류가 발생했습니다');
+                }
+            }
+        }
+
+        async function revokeUser(uid) {
+            if (confirm('이 사용자의 권한을 취소하시겠습니까?')) {
+                try {
+                    await window.dbUpdate(window.dbRef(window.database, 'users/' + uid), {
+                        status: 'rejected'
+                    });
+                    console.log('User revoked:', uid);
+                } catch (error) {
+                    console.error('Error revoking user:', error);
+                    alert('권한 취소 중 오류가 발생했습니다');
+                }
+            }
+        }
+
+        async function makeAdmin(uid) {
+            if (confirm('이 사용자를 관리자로 지정하시겠습니까?')) {
+                try {
+                    await window.dbUpdate(window.dbRef(window.database, 'users/' + uid), {
+                        role: 'admin',
+                        status: 'approved'
+                    });
+                    console.log('User promoted to admin:', uid);
+                } catch (error) {
+                    console.error('Error making admin:', error);
+                    alert('관리자 지정 중 오류가 발생했습니다');
+                }
+            }
+        }
+
+        async function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                try {
+                    await window.signOut(window.auth);
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+        }
+
+        window.filterUsers = filterUsers;
+        window.approveUser = approveUser;
+        window.rejectUser = rejectUser;
+        window.revokeUser = revokeUser;
+        window.makeAdmin = makeAdmin;
+        window.logout = logout;
+
+        if (window.firebaseReady) {
+            init();
+        } else {
+            window.addEventListener('firebaseReady', init);
+        }
+    </script>
+</body>
+</html>

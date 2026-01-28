@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MW GAME - 참가자</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-mid: #151b2e;
+            --bg-light: #1e2842;
+            --m-color: #ff3366;
+            --m-glow: #ff1744;
+            --w-color: #00d9ff;
+            --w-glow: #00bcd4;
+            --accent: #ffd700;
+            --text-primary: #ffffff;
+            --text-secondary: #8899bb;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 51, 102, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 217, 255, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .subtitle {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--m-color) 0%, var(--w-color) 100%);
+            color: white;
+            box-shadow: 
+                0 4px 20px rgba(255, 51, 102, 0.3),
+                0 4px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 6px 30px rgba(255, 51, 102, 0.4),
+                0 6px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        .settings-panel {
+            background: var(--bg-mid);
+            border: 2px solid var(--bg-light);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .setting-label {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        .input {
+            width: 100%;
+            padding: 20px;
+            background: var(--bg-dark);
+            border: 2px solid var(--text-secondary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-family: 'Orbitron', monospace;
+            letter-spacing: 0.2em;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .team-btn {
+            padding: 30px 20px;
+            background: var(--bg-light);
+            border: 3px solid var(--text-secondary);
+            border-radius: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .team-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .team-btn.selected {
+            background: linear-gradient(135deg, var(--m-color), var(--w-color));
+            border-color: var(--accent);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
+        }
+
+        .team-btn.taken {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            color: var(--w-color);
+            transform: translateX(-5px);
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .settings-panel {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Player Join Screen -->
+        <div id="playerJoinScreen" class="screen active">
+            <button class="back-btn" onclick="location.href='index.html'">←</button>
+            
+            <div class="header">
+                <div class="subtitle">게임 참가</div>
+            </div>
+
+            <div class="settings-panel">
+                <div class="input-group">
+                    <label class="setting-label">방 코드 입력</label>
+                    <input type="text" class="input" id="roomCodeInput" placeholder="ABC123" maxlength="6">
+                </div>
+
+                <button class="btn btn-primary" onclick="joinRoom()" style="width: 100%;">
+                    <span>입장하기</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Team Selection Screen -->
+        <div id="teamSelectScreen" class="screen">
+            <button class="back-btn" onclick="showJoinScreen()">←</button>
+            
+            <div class="header">
+                <div class="subtitle">팀 선택</div>
+            </div>
+
+            <div class="settings-panel">
+                <div class="team-grid" id="teamGrid">
+                    <!-- Teams will be generated dynamically -->
+                </div>
+
+                <button class="btn btn-primary" onclick="confirmTeam()" style="width: 100%; margin-top: 30px;">
+                    <span>선택 완료</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getDatabase, ref, get, set, push, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyCC0wATHn9czB7bwCn5RijT5zHpRF9_xS8",
+            authDomain: "mw-game-954a8.firebaseapp.com",
+            databaseURL: "https://mw-game-954a8-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mw-game-954a8",
+            storageBucket: "mw-game-954a8.firebasestorage.app",
+            messagingSenderId: "768733083712",
+            appId: "1:768733083712:web:7f194e8a59514eb74447a5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        window.database = database;
+        window.dbRef = ref;
+        window.dbGet = get;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+        
+        console.log("Firebase initialized!");
+    </script>
+
+    <script>
+        let gameState = {
+            roomCode: null,
+            selectedTeam: null,
+            teamCount: null,
+            takenTeams: []
+        };
+
+        async function joinRoom() {
+            const roomCode = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+            if (roomCode.length !== 6) {
+                alert('올바른 방 코드를 입력해주세요 (6자리)');
+                return;
+            }
+
+            try {
+                const roomRef = window.dbRef(window.database, 'rooms/' + roomCode);
+                const snapshot = await window.dbGet(roomRef);
+                
+                if (snapshot.exists()) {
+                    const roomData = snapshot.val();
+                    gameState.roomCode = roomCode;
+                    gameState.teamCount = roomData.teamCount;
+                    
+                    // Get already taken teams
+                    if (roomData.teams) {
+                        gameState.takenTeams = Object.values(roomData.teams).map(t => t.teamNumber);
+                    }
+                    
+                    showTeamSelection();
+                } else {
+                    alert('존재하지 않는 방 코드입니다');
+                }
+            } catch (error) {
+                console.error('Error joining room:', error);
+                alert('방 입장 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        function showTeamSelection() {
+            const teamGrid = document.getElementById('teamGrid');
+            teamGrid.innerHTML = '';
+            
+            for (let i = 1; i <= gameState.teamCount; i++) {
+                const teamBtn = document.createElement('button');
+                teamBtn.className = 'team-btn';
+                teamBtn.textContent = `팀 ${i}`;
+                
+                if (gameState.takenTeams.includes(i)) {
+                    teamBtn.classList.add('taken');
+                } else {
+                    teamBtn.onclick = () => selectTeam(i, teamBtn);
+                }
+                
+                teamGrid.appendChild(teamBtn);
+            }
+            
+            // Listen for real-time team changes
+            const teamsRef = window.dbRef(window.database, 'rooms/' + gameState.roomCode + '/teams');
+            window.dbOnValue(teamsRef, (snapshot) => {
+                const teams = snapshot.val();
+                if (teams) {
+                    gameState.takenTeams = Object.values(teams).map(t => t.teamNumber);
+                    updateTeamButtons();
+                }
+            });
+            
+            document.getElementById('playerJoinScreen').classList.remove('active');
+            document.getElementById('teamSelectScreen').classList.add('active');
+        }
+
+        function updateTeamButtons() {
+            const buttons = document.querySelectorAll('.team-btn');
+            buttons.forEach((btn, index) => {
+                const teamNumber = index + 1;
+                if (gameState.takenTeams.includes(teamNumber) && gameState.selectedTeam !== teamNumber) {
+                    btn.classList.add('taken');
+                    btn.onclick = null;
+                } else if (!btn.classList.contains('selected')) {
+                    btn.classList.remove('taken');
+                    btn.onclick = () => selectTeam(teamNumber, btn);
+                }
+            });
+        }
+
+        function selectTeam(teamNumber, element) {
+            if (gameState.takenTeams.includes(teamNumber)) {
+                alert('이미 선택된 팀입니다');
+                return;
+            }
+            
+            gameState.selectedTeam = teamNumber;
+            document.querySelectorAll('.team-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+
+        function showJoinScreen() {
+            document.getElementById('teamSelectScreen').classList.remove('active');
+            document.getElementById('playerJoinScreen').classList.add('active');
+        }
+
+        async function confirmTeam() {
+            if (!gameState.selectedTeam) {
+                alert('팀을 선택해주세요');
+                return;
+            }
+            
+            try {
+                const teamId = 'team_' + Date.now();
+                const teamRef = window.dbRef(window.database, 'rooms/' + gameState.roomCode + '/teams/' + teamId);
+                
+                await window.dbSet(teamRef, {
+                    teamNumber: gameState.selectedTeam,
+                    joinedAt: Date.now()
+                });
+                
+                window.location.href = `waiting-room.html?room=${gameState.roomCode}&mode=player&team=${gameState.selectedTeam}`;
+            } catch (error) {
+                console.error('Error confirming team:', error);
+                alert('팀 선택 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
