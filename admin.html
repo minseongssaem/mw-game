@@ -437,12 +437,20 @@
         function loadUsers() {
             const usersRef = window.dbRef(window.database, 'users');
             
+            console.log('Loading users from Firebase...');
+            
             window.dbOnValue(usersRef, (snapshot) => {
+                console.log('Firebase snapshot received:', snapshot.exists());
+                
                 if (snapshot.exists()) {
                     allUsers = snapshot.val();
+                    console.log('Users loaded:', Object.keys(allUsers).length, 'users');
+                    console.log('User data:', allUsers);
+                    
                     updateStats();
                     displayUsers();
                 } else {
+                    console.log('No users found in database');
                     document.getElementById('userList').innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">📭</div>
@@ -450,6 +458,15 @@
                         </div>
                     `;
                 }
+            }, (error) => {
+                console.error('Firebase error:', error);
+                document.getElementById('userList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <div>데이터를 불러오는 중 오류가 발생했습니다</div>
+                        <div style="color: var(--m-color); margin-top: 10px; font-size: 0.9rem;">${error.message}</div>
+                    </div>
+                `;
             });
         }
 
