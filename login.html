@@ -313,6 +313,17 @@
                         showError('승인이 거부되었습니다. 관리자에게 문의하세요');
                         return;
                     }
+
+                    // 사용 기간 체크 (관리자는 제외)
+                    if (userData.role !== 'admin' && userData.expiryDate) {
+                        const now = new Date().getTime();
+                        const expiry = userData.expiryDate;
+                        
+                        if (expiry < now) {
+                            showError('사용 기간이 만료되었습니다. 관리자에게 문의하세요');
+                            return;
+                        }
+                    }
                     
                     // 로컬 스토리지에 사용자 정보 저장
                     localStorage.setItem('currentUser', JSON.stringify({
@@ -399,6 +410,17 @@
                     if (userData.status === 'rejected') {
                         showError('승인이 거부되었습니다. 관리자에게 문의하세요');
                         return;
+                    }
+
+                    // 사용 기간 체크 (관리자는 제외)
+                    if (userData.role !== 'admin' && userData.expiryDate) {
+                        const now = new Date().getTime();
+                        const expiry = userData.expiryDate;
+                        
+                        if (expiry < now) {
+                            showError('사용 기간이 만료되었습니다. 관리자에게 문의하세요');
+                            return;
+                        }
                     }
                     
                     // 로컬 스토리지에 사용자 정보 저장

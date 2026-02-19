@@ -484,16 +484,34 @@
                 const status = user.status || 'pending';
                 const role = user.role || 'host';
                 const createdDate = new Date(user.createdAt).toLocaleDateString('ko-KR');
+                const expiryDate = user.expiryDate ? new Date(user.expiryDate) : null;
+                const now = new Date();
+                const isExpired = expiryDate && expiryDate < now;
 
                 let statusTag = '';
                 if (role === 'admin') {
                     statusTag = '<span class="meta-tag admin">관리자</span>';
+                } else if (isExpired) {
+                    statusTag = '<span class="meta-tag rejected">기간 만료</span>';
                 } else if (status === 'approved') {
                     statusTag = '<span class="meta-tag approved">승인됨</span>';
                 } else if (status === 'rejected') {
                     statusTag = '<span class="meta-tag rejected">거부됨</span>';
                 } else {
                     statusTag = '<span class="meta-tag pending">승인 대기</span>';
+                }
+
+                // 만료일 표시
+                let expiryTag = '';
+                if (expiryDate && role !== 'admin') {
+                    const daysLeft = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                    if (isExpired) {
+                        expiryTag = '<span class="meta-tag rejected">만료됨</span>';
+                    } else if (daysLeft <= 7) {
+                        expiryTag = `<span class="meta-tag" style="background: rgba(255, 165, 0, 0.2); color: orange; border: 1px solid orange;">${daysLeft}일 남음</span>`;
+                    } else {
+                        expiryTag = `<span class="meta-tag" style="background: rgba(0, 255, 136, 0.2); color: var(--success); border: 1px solid var(--success);">${expiryDate.toLocaleDateString('ko-KR')}까지</span>`;
+                    }
                 }
 
                 let actions = '';
@@ -505,6 +523,7 @@
                         `;
                     } else if (status === 'approved') {
                         actions = `
+                            <button class="action-btn" style="background: var(--accent); color: var(--bg-dark);" onclick="setExpiryDate('${uid}')">📅 기간 설정</button>
                             <button class="action-btn btn-admin" onclick="makeAdmin('${uid}')">관리자 지정</button>
                             <button class="action-btn btn-revoke" onclick="revokeUser('${uid}')">권한 취소</button>
                         `;
@@ -522,6 +541,7 @@
                             <div class="user-email">${user.email}</div>
                             <div class="user-meta">
                                 ${statusTag}
+                                ${expiryTag}
                                 <span class="meta-tag" style="background: rgba(136, 153, 187, 0.2); color: var(--text-secondary); border: 1px solid var(--text-secondary);">
                                     ${createdDate} 가입
                                 </span>
@@ -587,6 +607,96 @@
                     alert('권한 취소 중 오류가 발생했습니다');
                 }
             }
+        }
+
+        async function setExpiryDate(uid) {
+            const user = allUsers[uid];
+            const currentExpiry = user.expiryDate ? new Date(user.expiryDate).toISOString().split('T')[0] : '';
+            
+            const periods = [
+                { label: '1개월', days: 30 },
+                { label: '3개월', days: 90 },
+                { label: '6개월', days: 180 },
+                { label: '1년', days: 365 },
+                { label: '무제한', days: null },
+                { label: '직접 입력', days: 'custom' }
+            ];
+
+            let html = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center;" id="expiryModal" onclick="if(event.target.id === 'expiryModal') this.remove()">
+                    <div style="background: var(--bg-mid); border: 2px solid var(--bg-light); border-radius: 16px; padding: 30px; max-width: 500px; width: 90%;" onclick="event.stopPropagation()">
+                        <h3 style="color: var(--accent); margin-bottom: 20px; font-size: 1.5rem;">📅 사용 기간 설정</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">사용자: <strong style="color: var(--text-primary);">${user.displayName} (${user.email})</strong></p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+                            ${periods.map(p => `
+                                <button class="period-btn" onclick="selectPeriod(${p.days})" style="padding: 15px; background: var(--bg-dark); border: 2px solid var(--bg-light); border-radius: 8px; color: var(--text-primary); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; font-weight: 600; transition: all 0.3s ease;">
+                                    ${p.label}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <div id="customDateInput" style="display: none; margin-bottom: 20px;">
+                            <label style="display: block; color: var(--text-primary); margin-bottom: 10px; font-weight: 600;">만료일 직접 선택:</label>
+                            <input type="date" id="expiryDateInput" value="${currentExpiry}" style="width: 100%; padding: 12px; background: var(--bg-dark); border: 2px solid var(--text-secondary); border-radius: 8px; color: var(--text-primary); font-family: 'Noto Sans KR', sans-serif; font-size: 1rem;">
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="document.getElementById('expiryModal').remove()" style="flex: 1; padding: 12px; background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); border-radius: 8px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; font-weight: 600;">
+                                취소
+                            </button>
+                            <button onclick="confirmExpiryDate('${uid}')" style="flex: 1; padding: 12px; background: var(--accent); border: none; color: var(--bg-dark); border-radius: 8px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; font-weight: 700;">
+                                확인
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', html);
+
+            window.selectPeriod = (days) => {
+                document.querySelectorAll('.period-btn').forEach(btn => {
+                    btn.style.borderColor = 'var(--bg-light)';
+                });
+                event.target.style.borderColor = 'var(--accent)';
+
+                if (days === 'custom') {
+                    document.getElementById('customDateInput').style.display = 'block';
+                    window.selectedDays = null;
+                } else {
+                    document.getElementById('customDateInput').style.display = 'none';
+                    window.selectedDays = days;
+                }
+            };
+
+            window.confirmExpiryDate = async (uid) => {
+                let expiryTimestamp = null;
+
+                if (window.selectedDays === null) {
+                    // 직접 입력 또는 무제한
+                    const dateInput = document.getElementById('expiryDateInput');
+                    if (dateInput && dateInput.value) {
+                        expiryTimestamp = new Date(dateInput.value).getTime();
+                    }
+                } else if (window.selectedDays !== null) {
+                    // 기간 선택
+                    const now = new Date();
+                    const expiry = new Date(now.getTime() + (window.selectedDays * 24 * 60 * 60 * 1000));
+                    expiryTimestamp = expiry.getTime();
+                }
+
+                try {
+                    await window.dbUpdate(window.dbRef(window.database, 'users/' + uid), {
+                        expiryDate: expiryTimestamp
+                    });
+                    document.getElementById('expiryModal').remove();
+                    console.log('Expiry date set:', expiryTimestamp);
+                } catch (error) {
+                    console.error('Error setting expiry date:', error);
+                    alert('기간 설정 중 오류가 발생했습니다');
+                }
+            };
         }
 
         async function makeAdmin(uid) {
